@@ -6,4 +6,5 @@ public class CourseResponse
     public string CourseName { get; set; } = null!;
     public int SemesterId { get; set; }
     public string? SemesterName { get; set; }
+    public SemesterResponse? Semester { get; set; }
 }

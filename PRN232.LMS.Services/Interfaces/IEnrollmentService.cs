@@ -9,6 +9,8 @@ public interface IEnrollmentService
     /// </summary>
     Task<PagedResponse<EnrollmentBM>> GetListAsync(EnrollmentListQuery query);
 
+    Task<PagedResponse<EnrollmentBM>> GetListByCourseIdAsync(int courseId, EnrollmentListQuery query);
+
     /// <summary>Always returns nested Student and Course objects.</summary>
     Task<EnrollmentBM?> GetByIdAsync(int id);
 

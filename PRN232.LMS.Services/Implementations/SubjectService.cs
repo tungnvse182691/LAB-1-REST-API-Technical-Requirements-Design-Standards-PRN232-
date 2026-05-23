@@ -57,6 +57,44 @@ public class SubjectService : ISubjectService
         return (items.Select(MapToBM), total);
     }
 
+    public async Task<SubjectBM> CreateAsync(string subjectCode, string subjectName, int credit)
+    {
+        var entity = new PRN232.LMS.Repositories.Entities.Subject
+        {
+            SubjectCode = subjectCode,
+            SubjectName = subjectName,
+            Credit = credit
+        };
+
+        await _uow.Subjects.AddAsync(entity);
+        await _uow.SaveChangesAsync();
+        return MapToBM(entity);
+    }
+
+    public async Task<SubjectBM?> UpdateAsync(int id, string subjectCode, string subjectName, int credit)
+    {
+        var existing = await _uow.Subjects.GetByIdAsync(id);
+        if (existing is null) return null;
+
+        existing.SubjectCode = subjectCode;
+        existing.SubjectName = subjectName;
+        existing.Credit = credit;
+
+        _uow.Subjects.Update(existing);
+        await _uow.SaveChangesAsync();
+        return MapToBM(existing);
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var existing = await _uow.Subjects.GetByIdAsync(id);
+        if (existing is null) return false;
+
+        _uow.Subjects.Remove(existing);
+        await _uow.SaveChangesAsync();
+        return true;
+    }
+
     private static SubjectBM MapToBM(PRN232.LMS.Repositories.Entities.Subject s) => new()
     {
         SubjectId   = s.SubjectId,

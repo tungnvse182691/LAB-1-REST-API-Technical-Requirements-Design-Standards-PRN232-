@@ -62,4 +62,21 @@ public class EnrollmentRepository : IEnrollmentRepository
         var items = await query.Skip(skip).Take(take).ToListAsync();
         return (items, total);
     }
+
+    public async Task<(IEnumerable<Enrollment> Items, int Total)> GetByCourseIdAsync(
+        int courseId, int skip, int take, bool includeRelated = false)
+    {
+        IQueryable<Enrollment> query = _context.Enrollments
+            .AsNoTracking()
+            .Where(e => e.CourseId == courseId);
+
+        if (includeRelated)
+            query = query
+                .Include(e => e.Student)
+                .Include(e => e.Course).ThenInclude(c => c.Semester);
+
+        var total = await query.CountAsync();
+        var items = await query.Skip(skip).Take(take).ToListAsync();
+        return (items, total);
+    }
 }

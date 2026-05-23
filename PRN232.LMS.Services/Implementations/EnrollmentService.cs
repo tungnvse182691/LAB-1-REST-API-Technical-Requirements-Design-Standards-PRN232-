@@ -14,44 +14,12 @@ public class EnrollmentService : IEnrollmentService
     // ── GetListAsync ─────────────────────────────────────────────────────────
     public async Task<PagedResponse<EnrollmentBM>> GetListAsync(EnrollmentListQuery query)
     {
-        var page   = query.Page < 1 ? 1 : query.Page;
-        var size   = query.Size < 1 ? 10 : query.Size;
-        bool expand = !string.IsNullOrWhiteSpace(query.Expand) &&
-                      (query.Expand.Contains("student", StringComparison.OrdinalIgnoreCase) ||
-                       query.Expand.Contains("course",  StringComparison.OrdinalIgnoreCase));
+        return await GetPagedAsync(query, null);
+    }
 
-        // 1. Fetch all from repository (with related data if expand requested)
-        var (source, total) = await _repo.GetAllAsync(0, int.MaxValue, includeRelated: expand);
-
-        // 2. Filter by Status (case-insensitive)
-        IEnumerable<Enrollment> filtered = source;
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var lower = query.Search.ToLower();
-            filtered = filtered.Where(e => e.Status.ToLower().Contains(lower));
-        }
-
-        var filteredList = filtered.ToList();
-        total = filteredList.Count;
-
-        // 3. Sort
-        filteredList = ApplySort(filteredList, query.Sort).ToList();
-
-        // 4. Page
-        var items = filteredList.Skip((page - 1) * size).Take(size).ToList();
-
-        // 5. Map → BM
-        return new PagedResponse<EnrollmentBM>
-        {
-            Items = items.Select(e => MapToBM(e, expand)),
-            Pagination = new PaginationMeta
-            {
-                Page       = page,
-                PageSize   = size,
-                TotalItems = total,
-                TotalPages = (int)Math.Ceiling(total / (double)size)
-            }
-        };
+    public async Task<PagedResponse<EnrollmentBM>> GetListByCourseIdAsync(int courseId, EnrollmentListQuery query)
+    {
+        return await GetPagedAsync(query, courseId);
     }
 
     // ── GetByIdAsync ─────────────────────────────────────────────────────────
@@ -166,4 +134,46 @@ public class EnrollmentService : IEnrollmentService
             SemesterName = e.Course.Semester?.SemesterName ?? string.Empty
         } : null
     };
+
+    private async Task<PagedResponse<EnrollmentBM>> GetPagedAsync(EnrollmentListQuery query, int? courseId)
+    {
+        var page   = query.Page < 1 ? 1 : query.Page;
+        var size   = query.Size < 1 ? 10 : query.Size;
+        bool expand = !string.IsNullOrWhiteSpace(query.Expand) &&
+                      (query.Expand.Contains("student", StringComparison.OrdinalIgnoreCase) ||
+                       query.Expand.Contains("course",  StringComparison.OrdinalIgnoreCase));
+
+        IEnumerable<Enrollment> source;
+        int total;
+
+        if (courseId.HasValue)
+            (source, total) = await _repo.GetByCourseIdAsync(courseId.Value, 0, int.MaxValue, includeRelated: expand);
+        else
+            (source, total) = await _repo.GetAllAsync(0, int.MaxValue, includeRelated: expand);
+
+        IEnumerable<Enrollment> filtered = source;
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var lower = query.Search.ToLower();
+            filtered = filtered.Where(e => e.Status.ToLower().Contains(lower));
+        }
+
+        var filteredList = filtered.ToList();
+        total = filteredList.Count;
+
+        filteredList = ApplySort(filteredList, query.Sort).ToList();
+        var items = filteredList.Skip((page - 1) * size).Take(size).ToList();
+
+        return new PagedResponse<EnrollmentBM>
+        {
+            Items = items.Select(e => MapToBM(e, expand)),
+            Pagination = new PaginationMeta
+            {
+                Page       = page,
+                PageSize   = size,
+                TotalItems = total,
+                TotalPages = (int)Math.Ceiling(total / (double)size)
+            }
+        };
+    }
 }

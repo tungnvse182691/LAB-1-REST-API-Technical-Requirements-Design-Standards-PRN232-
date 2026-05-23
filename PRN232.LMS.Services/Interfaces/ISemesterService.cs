@@ -8,4 +8,10 @@ public interface ISemesterService
     Task<SemesterBM?> GetByIdAsync(int id);
     Task<(IEnumerable<SemesterBM> Items, int TotalCount)> GetPagedAsync(
         string? search, string? sort, int page, int size);
+
+    Task<SemesterBM> CreateAsync(string semesterName, DateTime startDate, DateTime endDate);
+
+    Task<SemesterBM?> UpdateAsync(int id, string semesterName, DateTime startDate, DateTime endDate);
+
+    Task<bool> DeleteAsync(int id);
 }

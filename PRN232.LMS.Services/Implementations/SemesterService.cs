@@ -52,6 +52,44 @@ public class SemesterService : ISemesterService
         return (items.Select(MapToBM), total);
     }
 
+    public async Task<SemesterBM> CreateAsync(string semesterName, DateTime startDate, DateTime endDate)
+    {
+        var entity = new PRN232.LMS.Repositories.Entities.Semester
+        {
+            SemesterName = semesterName,
+            StartDate = startDate,
+            EndDate = endDate
+        };
+
+        await _uow.Semesters.AddAsync(entity);
+        await _uow.SaveChangesAsync();
+        return MapToBM(entity);
+    }
+
+    public async Task<SemesterBM?> UpdateAsync(int id, string semesterName, DateTime startDate, DateTime endDate)
+    {
+        var existing = await _uow.Semesters.GetByIdAsync(id);
+        if (existing is null) return null;
+
+        existing.SemesterName = semesterName;
+        existing.StartDate = startDate;
+        existing.EndDate = endDate;
+
+        _uow.Semesters.Update(existing);
+        await _uow.SaveChangesAsync();
+        return MapToBM(existing);
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var existing = await _uow.Semesters.GetByIdAsync(id);
+        if (existing is null) return false;
+
+        _uow.Semesters.Remove(existing);
+        await _uow.SaveChangesAsync();
+        return true;
+    }
+
     private static SemesterBM MapToBM(PRN232.LMS.Repositories.Entities.Semester s) => new()
     {
         SemesterId   = s.SemesterId,
