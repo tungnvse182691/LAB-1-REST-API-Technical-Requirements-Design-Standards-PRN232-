@@ -1,0 +1,26 @@
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build folders
+bin/
+obj/
+
+## NuGet
+packages/
+*.nupkg
+
+## Rider
+.idea/
+
+## VSCode
+.vscode/
+
+## Logs
+*.log
+
+## ASP.NET
+appsettings*.json
