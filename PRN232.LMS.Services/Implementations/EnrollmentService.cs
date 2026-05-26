@@ -131,7 +131,14 @@ public class EnrollmentService : IEnrollmentService
             CourseId     = e.Course.CourseId,
             CourseName   = e.Course.CourseName,
             SemesterId   = e.Course.SemesterId,
-            SemesterName = e.Course.Semester?.SemesterName ?? string.Empty
+            SemesterName = e.Course.Semester?.SemesterName ?? string.Empty,
+            Semester = e.Course.Semester is not null ? new SemesterBM
+            {
+                SemesterId   = e.Course.Semester.SemesterId,
+                SemesterName = e.Course.Semester.SemesterName,
+                StartDate    = e.Course.Semester.StartDate,
+                EndDate      = e.Course.Semester.EndDate
+            } : null
         } : null
     };
 

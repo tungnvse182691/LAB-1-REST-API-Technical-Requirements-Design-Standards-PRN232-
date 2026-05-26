@@ -29,7 +29,7 @@ public class EnrollmentsController : ControllerBase
             Sort   = q.Sort,
             Page   = q.Page,
             Size   = q.Size,
-            Expand = q.Expand
+            Expand = GetEffectiveExpand(q)
         });
 
         var responses = result.Items.Select(MapToResponse).ToList();
@@ -148,4 +148,7 @@ public class EnrollmentsController : ControllerBase
             SemesterName = bm.Course.SemesterName
         }
     };
+
+    private static string? GetEffectiveExpand(ListQueryRequest q) =>
+        !string.IsNullOrWhiteSpace(q.Expand) ? q.Expand : q.Expland;
 }

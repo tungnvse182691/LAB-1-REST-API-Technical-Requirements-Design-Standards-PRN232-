@@ -25,4 +25,8 @@ public class ListQueryRequest
     /// <summary>Comma-separated related entities to expand. e.g. "student,course"</summary>
     [FromQuery(Name = "expand")]
     public string? Expand { get; set; }
+
+    /// <summary>Backward-compatible alias for expand.</summary>
+    [FromQuery(Name = "expland")]
+    public string? Expland { get; set; }
 }

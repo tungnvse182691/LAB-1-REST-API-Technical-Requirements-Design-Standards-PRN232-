@@ -23,7 +23,7 @@ public class CoursesController : ControllerBase
     public async Task<ActionResult<ApiResponse<object>>> GetList(
         [FromQuery] ListQueryRequest q)
     {
-        var (items, total) = await _service.GetPagedAsync(q.Search, q.Sort, q.Page, q.Size, q.Expand);
+        var (items, total) = await _service.GetPagedAsync(q.Search, q.Sort, q.Page, q.Size, GetEffectiveExpand(q));
         var responses = items.Select(MapToResponse).ToList();
 
         object itemData = string.IsNullOrWhiteSpace(q.Fields)
@@ -79,7 +79,7 @@ public class CoursesController : ControllerBase
             Sort   = q.Sort,
             Page   = q.Page,
             Size   = q.Size,
-            Expand = q.Expand
+            Expand = GetEffectiveExpand(q, "student,course")
         });
 
         var responses = result.Items.Select(MapEnrollmentResponse).ToList();
@@ -185,4 +185,8 @@ public class CoursesController : ControllerBase
             }
         }
     };
+
+    private static string? GetEffectiveExpand(ListQueryRequest q, string? defaultValue = null) =>
+        !string.IsNullOrWhiteSpace(q.Expand) ? q.Expand :
+        !string.IsNullOrWhiteSpace(q.Expland) ? q.Expland : defaultValue;
 }
